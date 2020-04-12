@@ -9,19 +9,23 @@ import com.gestankbratwurst.fruchtcore.util.common.UtilMobs;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtcore.util.tuples.Pair;
 import com.gestankbratwurst.fruchtjobs.jobs.sieving.SieveManager;
+import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectMap;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -98,11 +102,15 @@ public class JobExpGainManager {
     this.fragmentChestMap = new Double2ObjectOpenHashMap<>();
     this.fragmentDigMap = new Double2ObjectOpenHashMap<>();
     this.recipeMaps = new Object2ObjectLinkedOpenHashMap<>();
+    this.smithItems = new ObjectArrayList<>();
+    this.craftItems = new ObjectArrayList<>();
     init();
   }
 
   private final ThreadLocalRandom random;
   private final Map<ItemStack, JobExpPackage> recipeMaps;
+  private final ObjectList<ItemStack> smithItems;
+  private final ObjectList<ItemStack> craftItems;
   private final EnumSet<Material> stoneMap;
   private final EnumSet<Material> pickaxes;
   private final EnumSet<Material> axes;
@@ -150,8 +158,24 @@ public class JobExpGainManager {
     for (Entry<ItemStack, JobExpPackage> entry : recipeMaps.entrySet()) {
       if (entry.getKey().isSimilar(result)) {
         JobExpPackage jobExpPackage = entry.getValue();
-        jobManager.getOnlineHolder((Player) event.getWhoClicked())
-            .addExp(jobExpPackage.getJobType(), jobExpPackage.getBaseExp() * timesCrafted);
+        JobHolder holder = jobManager.getOnlineHolder((Player) event.getWhoClicked());
+        if (holder.isActive(jobExpPackage.getJobType())) {
+          double exp = jobExpPackage.getBaseExp();
+          if (holder.hasPerk(JobPerkType.SMITH_APPRENTICE)) {
+            for (ItemStack item : smithItems) {
+              if (item.isSimilar(result)) {
+                exp += Math.max(1, exp * 0.1);
+              }
+            }
+          } else if (holder.hasPerk(JobPerkType.CRAFT_APPRENTICE)) {
+            for (ItemStack item : craftItems) {
+              if (item.isSimilar(result)) {
+                exp += Math.max(1, exp * 0.15);
+              }
+            }
+          }
+          holder.addExp(jobExpPackage.getJobType(), (int) exp * timesCrafted);
+        }
         break;
       }
     }
@@ -608,6 +632,8 @@ public class JobExpGainManager {
   }
 
   private void init() {
+    Stopwatch sw = Stopwatch.createStarted();
+
     fishMap.put(Material.COD, 6L);
     fishMap.put(Material.SALMON, 6L);
     fishMap.put(Material.PUFFERFISH, 10L);
@@ -778,6 +804,42 @@ public class JobExpGainManager {
     recipeMaps.put(new ItemStack(Material.GOLDEN_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 105));
     recipeMaps.put(new ItemStack(Material.GOLDEN_BOOTS), JobExpPackage.of(JobType.CRAFTER, 60));
     recipeMaps.put(new ItemStack(Material.FISHING_ROD), JobExpPackage.of(JobType.CRAFTER, 9));
+    recipeMaps.put(new ItemStack(Material.ARROW), JobExpPackage.of(JobType.CRAFTER, 6));
+
+    smithItems.add(new ItemStack(Material.ANVIL));
+    smithItems.add(new ItemStack(Material.IRON_AXE));
+    smithItems.add(new ItemStack(Material.IRON_PICKAXE));
+    smithItems.add(new ItemStack(Material.IRON_SHOVEL));
+    smithItems.add(new ItemStack(Material.IRON_HOE));
+    smithItems.add(new ItemStack(Material.IRON_SWORD));
+    smithItems.add(new ItemStack(Material.GOLDEN_AXE));
+    smithItems.add(new ItemStack(Material.GOLDEN_PICKAXE));
+    smithItems.add(new ItemStack(Material.GOLDEN_SHOVEL));
+    smithItems.add(new ItemStack(Material.GOLDEN_HOE));
+    smithItems.add(new ItemStack(Material.GOLDEN_SWORD));
+    smithItems.add(new ItemStack(Material.DIAMOND_AXE));
+    smithItems.add(new ItemStack(Material.DIAMOND_PICKAXE));
+    smithItems.add(new ItemStack(Material.DIAMOND_SHOVEL));
+    smithItems.add(new ItemStack(Material.DIAMOND_HOE));
+    smithItems.add(new ItemStack(Material.DIAMOND_SWORD));
+    smithItems.add(new ItemStack(Material.IRON_HELMET));
+    smithItems.add(new ItemStack(Material.IRON_CHESTPLATE));
+    smithItems.add(new ItemStack(Material.IRON_LEGGINGS));
+    smithItems.add(new ItemStack(Material.IRON_BOOTS));
+    smithItems.add(new ItemStack(Material.CHAINMAIL_HELMET));
+    smithItems.add(new ItemStack(Material.CHAINMAIL_CHESTPLATE));
+    smithItems.add(new ItemStack(Material.CHAINMAIL_LEGGINGS));
+    smithItems.add(new ItemStack(Material.CHAINMAIL_BOOTS));
+    smithItems.add(new ItemStack(Material.DIAMOND_HELMET));
+    smithItems.add(new ItemStack(Material.DIAMOND_CHESTPLATE));
+    smithItems.add(new ItemStack(Material.DIAMOND_LEGGINGS));
+    smithItems.add(new ItemStack(Material.DIAMOND_BOOTS));
+
+    for (ItemStack item : recipeMaps.keySet()) {
+      if (!smithItems.contains(item)) {
+        craftItems.add(item);
+      }
+    }
 
     oreVeinDrops.put(0.0012, new ItemStack(Material.EMERALD_ORE));
     oreVeinDrops.put(0.0016, new ItemStack(Material.DIAMOND_ORE));
@@ -867,7 +929,9 @@ public class JobExpGainManager {
         logMap.put(mat, 6L);
       }
     }
-
+    double elapsed = sw.stop().elapsed(TimeUnit.MICROSECONDS) / 1000D;
+    elapsed = ((int) (elapsed * 10)) / 10D;
+    Bukkit.getPluginManager().getPlugin("FruchtJobs").getLogger().info("Initialized JobExpGainManager [" + elapsed + "ms]");
   }
 
 }

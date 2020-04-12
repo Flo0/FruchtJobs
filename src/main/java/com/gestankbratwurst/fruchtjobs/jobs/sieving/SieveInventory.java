@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
@@ -62,12 +63,8 @@ public class SieveInventory {
       .build();
 
   private static final ItemStack ENERGY_ITEM = new ItemBuilder(Model.SIEVE_ENERGY_FULL.getItem())
-      .name("§eEnergie")
+      .name("§eEnergie §6[ §e100 §6/ §e100 §6]")
       .build();
-
-  static {
-    UtilItem.setMaxStackSize(ENERGY_ITEM, 100);
-  }
 
   private static final int[] SIEVE_SLOT_IDS = new int[]{
       10, 11, 12, 13, 14, 15,
@@ -119,6 +116,9 @@ public class SieveInventory {
         return;
       }
       energyItem.subtract(energyMinus);
+      ItemMeta energyMeta = energyItem.getItemMeta();
+      energyMeta.setDisplayName("§eEnergie §6[ §e" + energyItem.getAmount() + " §6/ §e100 §6]");
+      energyItem.setItemMeta(energyMeta);
       bukkitInventory.setItem(8, energyItem);
     } else if (miscConsumer.containsKey(slotID)) {
       miscConsumer.get(slotID).accept(event);

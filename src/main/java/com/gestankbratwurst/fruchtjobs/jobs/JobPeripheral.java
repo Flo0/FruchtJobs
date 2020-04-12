@@ -12,16 +12,27 @@ import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtjobs.FruchtJobs;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.FilletFurnaceRecipe;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeButcherKnife;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeChainBoots;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeChainChestplate;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeChainHelmet;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeChainLeggins;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeChains;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeCobblePouch;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeather;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeatherBoots;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeatherChestplate;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeatherHelmet;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeatherLeggins;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHomestone;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeLogPouch;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeSieve;
 import com.gestankbratwurst.fruchtjobs.jobs.sieving.SieveManager;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.bukkit.Bukkit;
@@ -31,12 +42,12 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -60,6 +71,7 @@ public class JobPeripheral implements Listener {
   private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
 
   public static void init(FruchtCore core, FruchtJobs plugin) {
+    Stopwatch sw = Stopwatch.createStarted();
     JobManager jobManager = plugin.getJobManager();
     ItemActionManager itemActionManager = core.getItemActionManager();
     RecipeModule recipeModule = core.getRecipeModule();
@@ -144,14 +156,33 @@ public class JobPeripheral implements Listener {
       }
     });
 
+    itemActionManager.registerAttackAction("ONE_RANGED", event -> {
+      if (event.getDamager() instanceof Projectile) {
+        event.setDamage(event.getDamage() + 1);
+      }
+    });
+
     recipeModule.registerRecipe(new RecipeCobblePouch(jobManager));
     recipeModule.registerRecipe(new RecipeLogPouch(jobManager));
     recipeModule.registerRecipe(new RecipeButcherKnife(jobManager));
     recipeModule.registerRecipe(new FilletFurnaceRecipe());
     recipeModule.registerRecipe(new RecipeHomestone(jobManager));
     recipeModule.registerRecipe(new RecipeSieve(jobManager));
+    recipeModule.registerRecipe(new RecipeHardLeather(jobManager));
+    recipeModule.registerRecipe(new RecipeChains(jobManager));
+    recipeModule.registerRecipe(new RecipeHardLeatherHelmet(jobManager));
+    recipeModule.registerRecipe(new RecipeHardLeatherChestplate(jobManager));
+    recipeModule.registerRecipe(new RecipeHardLeatherLeggins(jobManager));
+    recipeModule.registerRecipe(new RecipeHardLeatherBoots(jobManager));
+    recipeModule.registerRecipe(new RecipeChainHelmet(jobManager));
+    recipeModule.registerRecipe(new RecipeChainChestplate(jobManager));
+    recipeModule.registerRecipe(new RecipeChainLeggins(jobManager));
+    recipeModule.registerRecipe(new RecipeChainBoots(jobManager));
 
     Bukkit.getPluginManager().registerEvents(new JobPeripheral(core, plugin), plugin);
+    double elapsed = sw.elapsed(TimeUnit.MICROSECONDS) / 1000D;
+    elapsed = ((int) (elapsed * 10D)) / 10D;
+    plugin.getLogger().info("Initialized JobPeripheral [" + elapsed + "ms]");
   }
 
   private final Set<Material> STONES = ImmutableSet.of(Material.COBBLESTONE, Material.STONE);
