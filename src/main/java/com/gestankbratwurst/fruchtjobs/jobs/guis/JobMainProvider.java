@@ -1,5 +1,6 @@
 package com.gestankbratwurst.fruchtjobs.jobs.guis;
 
+import com.gestankbratwurst.fruchtcore.recipes.RecipeGUI;
 import com.gestankbratwurst.fruchtcore.util.Msg;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtcore.util.items.ItemBuilder;
@@ -93,6 +94,12 @@ public class JobMainProvider implements InventoryProvider {
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
     });
     content.set(SlotPos.of(4, 8), optionsButton);
+
+    ClickableItem recipesButton = ClickableItem.of(new ItemBuilder(Material.CRAFTING_TABLE).name("§eRezepte").build(), e -> {
+      RecipeGUI.open(player);
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+    });
+    content.set(SlotPos.of(4, 0), recipesButton);
   }
 
 }

@@ -1,7 +1,7 @@
 package com.gestankbratwurst.fruchtjobs.jobs.recipes;
 
 import com.gestankbratwurst.fruchtcore.recipes.IPlayerConditional;
-import com.gestankbratwurst.fruchtcore.recipes.IShapedCraftingRecipe;
+import com.gestankbratwurst.fruchtcore.recipes.IShapelessCraftingRecipe;
 import com.gestankbratwurst.fruchtcore.util.Msg;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtjobs.jobs.JobHolder;
@@ -10,22 +10,24 @@ import com.gestankbratwurst.fruchtjobs.jobs.JobPerkType;
 import com.gestankbratwurst.fruchtjobs.jobs.JobType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
  *
- * This file is part of FruchtJobs and was created at the 08.04.2020
+ * This file is part of FruchtJobs and was created at the 12.04.2020
  *
  * FruchtJobs can not be copied and/or distributed without the express
  * permission of the owner.
  *
  */
-public abstract class AbstractJobShapedRecipe implements IShapedCraftingRecipe, IPlayerConditional {
+public abstract class AbstractJobShapelessRecipe implements IShapelessCraftingRecipe, IPlayerConditional {
 
-  public AbstractJobShapedRecipe(JobManager jobManager, JobType jobType, int minLevel, JobPerkType... perks) {
+  public AbstractJobShapelessRecipe(JobManager jobManager, JobType jobType, int minLevel, JobPerkType... perks) {
     this.jobManager = jobManager;
     this.jobType = jobType;
     this.minLevel = minLevel;
@@ -74,22 +76,6 @@ public abstract class AbstractJobShapedRecipe implements IShapedCraftingRecipe, 
     UtilPlayer.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 0.5F, 0.35F);
   }
 
-  protected boolean check(Player player) {
-    return true;
-  }
-
-  protected abstract List<String> evalDescription(Player player);
-
-  @Override
-  public String getDisplayName(Player player) {
-    ItemStack result = this.getResult();
-    if (result.hasItemMeta()) {
-      return result.getItemMeta().getDisplayName();
-    } else {
-      return result.getI18NDisplayName();
-    }
-  }
-
   @Override
   public String[] getDescription(Player player) {
     List<String> desc = new ArrayList<>(evalDescription(player));
@@ -109,5 +95,21 @@ public abstract class AbstractJobShapedRecipe implements IShapedCraftingRecipe, 
     }
     return desc.toArray(new String[0]);
   }
+
+  @Override
+  public String getDisplayName(Player player) {
+    ItemStack result = this.getResult();
+    if (result.hasItemMeta()) {
+      return result.getItemMeta().getDisplayName();
+    } else {
+      return result.getI18NDisplayName();
+    }
+  }
+
+  protected boolean check(Player player) {
+    return true;
+  }
+
+  protected abstract List<String> evalDescription(Player player);
 
 }

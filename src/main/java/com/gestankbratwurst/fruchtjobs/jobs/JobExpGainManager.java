@@ -26,6 +26,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -94,6 +95,7 @@ public class JobExpGainManager {
     this.pickaxes = EnumSet.noneOf(Material.class);
     this.axes = EnumSet.noneOf(Material.class);
     this.hoes = EnumSet.noneOf(Material.class);
+    this.saltWaterBiomes = EnumSet.noneOf(Biome.class);
     this.adventureSoilSet = EnumSet.noneOf(Material.class);
     this.learnedButcherDrops = new EnumMap<>(EntityType.class);
     this.netherSearcherBlockDrops = new Double2ObjectOpenHashMap<>();
@@ -101,6 +103,8 @@ public class JobExpGainManager {
     this.extraDigDrops = new Double2ObjectOpenHashMap<>();
     this.fragmentChestMap = new Double2ObjectOpenHashMap<>();
     this.fragmentDigMap = new Double2ObjectOpenHashMap<>();
+    this.saltWaterFishMap = new Double2ObjectOpenHashMap<>();
+    this.freshWaterFishMap = new Double2ObjectOpenHashMap<>();
     this.recipeMaps = new Object2ObjectLinkedOpenHashMap<>();
     this.smithItems = new ObjectArrayList<>();
     this.craftItems = new ObjectArrayList<>();
@@ -111,6 +115,7 @@ public class JobExpGainManager {
   private final Map<ItemStack, JobExpPackage> recipeMaps;
   private final ObjectList<ItemStack> smithItems;
   private final ObjectList<ItemStack> craftItems;
+  private final EnumSet<Biome> saltWaterBiomes;
   private final EnumSet<Material> stoneMap;
   private final EnumSet<Material> pickaxes;
   private final EnumSet<Material> axes;
@@ -134,6 +139,8 @@ public class JobExpGainManager {
   private final Double2ObjectMap<ItemStack> oreVeinDrops;
   private final Double2ObjectMap<ItemStack> fragmentChestMap;
   private final Double2ObjectMap<ItemStack> fragmentDigMap;
+  private final Double2ObjectMap<ItemStack> saltWaterFishMap;
+  private final Double2ObjectMap<ItemStack> freshWaterFishMap;
   private final JobManager jobManager;
   private final TaskManager taskManager;
   private final SieveManager sieveManager;
@@ -200,7 +207,7 @@ public class JobExpGainManager {
     if (!holder.isActive(JobType.FARMER)) {
       return;
     }
-    holder.addExp(JobType.FARMER, (holder.hasPerk(JobPerkType.BETTER_BUTCHER) ? 20 : 16));
+    holder.addExp(JobType.FARMER, (holder.hasPerk(JobPerkType.BETTER_BUTCHER) ? 20 : 14));
   }
 
   protected void handleEvent(PlayerShearEntityEvent event) {
@@ -208,7 +215,7 @@ public class JobExpGainManager {
     if (!holder.isActive(JobType.FARMER)) {
       return;
     }
-    holder.addExp(JobType.FARMER, (holder.hasPerk(JobPerkType.BETTER_BUTCHER) ? 11 : 8));
+    holder.addExp(JobType.FARMER, (holder.hasPerk(JobPerkType.BETTER_BUTCHER) ? 10 : 8));
     if (holder.hasPerk(JobPerkType.LEARNED_BUTCHER)) {
       if (random.nextBoolean()) {
         Location dropLoc = event.getEntity().getLocation();
@@ -409,6 +416,29 @@ public class JobExpGainManager {
         Item item = (Item) entity;
         long fishExp = fishMap.getOrDefault(item.getItemStack().getType(), 0L) + event.getExpToDrop();
         if (fishExp != 0L) {
+          Location loc = entity.getLocation();
+          Biome fishBiome = entity.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+          if (holder.hasPerk(JobPerkType.SWEET_WATER_FISHING)) {
+            if (!saltWaterBiomes.contains(fishBiome)) {
+              for (Double2ObjectMap.Entry<ItemStack> entry : freshWaterFishMap.double2ObjectEntrySet()) {
+                if (random.nextDouble() <= entry.getDoubleKey()) {
+                  item.setItemStack(entry.getValue());
+                  fishExp += Math.min(1, fishExp * 0.25);
+                  break;
+                }
+              }
+            }
+          } else if (holder.hasPerk(JobPerkType.SALT_WATER_FISHING)) {
+            if (saltWaterBiomes.contains(fishBiome)) {
+              for (Double2ObjectMap.Entry<ItemStack> entry : saltWaterFishMap.double2ObjectEntrySet()) {
+                if (random.nextDouble() <= entry.getDoubleKey()) {
+                  item.setItemStack(entry.getValue());
+                  fishExp += Math.min(1, fishExp * 0.25);
+                  break;
+                }
+              }
+            }
+          }
           holder.addExp(JobType.FISHER, fishExp);
         }
       }
@@ -841,6 +871,14 @@ public class JobExpGainManager {
       }
     }
 
+    saltWaterFishMap.put(0.181, ItemLibrary.ANEMON_FISH.getItem());
+    saltWaterFishMap.put(0.061, ItemLibrary.HAWK_FISH.getItem());
+    saltWaterFishMap.put(0.221, ItemLibrary.SNAPPER.getItem());
+
+    freshWaterFishMap.put(0.181, ItemLibrary.SHRIMP.getItem());
+    freshWaterFishMap.put(0.061, ItemLibrary.SHAD.getItem());
+    freshWaterFishMap.put(0.221, ItemLibrary.TROUT.getItem());
+
     oreVeinDrops.put(0.0012, new ItemStack(Material.EMERALD_ORE));
     oreVeinDrops.put(0.0016, new ItemStack(Material.DIAMOND_ORE));
     oreVeinDrops.put(0.015, new ItemStack(Material.IRON_ORE));
@@ -881,10 +919,10 @@ public class JobExpGainManager {
     extraDigDrops.put(0.0025, () -> new ItemStack(Material.DIAMOND));
     extraDigDrops.put(0.002, () -> new ItemStack(Material.EMERALD));
     extraDigDrops.put(0.08, () -> new ItemStack(Material.BONE));
-    extraDigDrops.put(0.08, () -> new ItemStack(Material.BONE_MEAL));
-    extraDigDrops.put(0.045, () -> new ItemStack(Material.GRAVEL));
-    extraDigDrops.put(0.045, () -> new ItemStack(Material.SAND));
-    extraDigDrops.put(0.045, () -> new ItemStack(Material.CLAY_BALL));
+    extraDigDrops.put(0.081, () -> new ItemStack(Material.BONE_MEAL));
+    extraDigDrops.put(0.0451, () -> new ItemStack(Material.GRAVEL));
+    extraDigDrops.put(0.0452, () -> new ItemStack(Material.SAND));
+    extraDigDrops.put(0.0453, () -> new ItemStack(Material.CLAY_BALL));
     extraDigDrops.put(0.01, () -> new ItemStack(Material.LAPIS_LAZULI));
     extraDigDrops.put(0.028, () -> new ItemStack(Material.COAL));
     extraDigDrops.put(0.04, () -> {
@@ -914,15 +952,24 @@ public class JobExpGainManager {
     netherSearcherBlockDrops.put(0.05, new ItemStack(Material.QUARTZ));
     netherSearcherBlockDrops.put(0.1, new ItemStack(Material.GUNPOWDER));
 
-    fragmentChestMap.put(0.04, ItemLibrary.LESSER_ARTIFACT_ADEM.getItem());
-    fragmentChestMap.put(0.04, ItemLibrary.LESSER_ARTIFACT_KEHR.getItem());
-    fragmentChestMap.put(0.04, ItemLibrary.LESSER_ARTIFACT_VULD.getItem());
+    fragmentChestMap.put(0.0401, ItemLibrary.LESSER_ARTIFACT_ADEM.getItem());
+    fragmentChestMap.put(0.0402, ItemLibrary.LESSER_ARTIFACT_KEHR.getItem());
+    fragmentChestMap.put(0.0403, ItemLibrary.LESSER_ARTIFACT_VULD.getItem());
     fragmentChestMap.put(0.025, ItemLibrary.LESSER_ARTIFACT_BONES.getItem());
 
-    fragmentDigMap.put(0.0033, ItemLibrary.LESSER_ARTIFACT_ADEM.getItem());
-    fragmentDigMap.put(0.0033, ItemLibrary.LESSER_ARTIFACT_KEHR.getItem());
-    fragmentDigMap.put(0.0033, ItemLibrary.LESSER_ARTIFACT_VULD.getItem());
+    fragmentDigMap.put(0.003301, ItemLibrary.LESSER_ARTIFACT_ADEM.getItem());
+    fragmentDigMap.put(0.003302, ItemLibrary.LESSER_ARTIFACT_KEHR.getItem());
+    fragmentDigMap.put(0.003303, ItemLibrary.LESSER_ARTIFACT_VULD.getItem());
     fragmentDigMap.put(0.015, ItemLibrary.LESSER_ARTIFACT_BONES.getItem());
+
+    for (Biome biome : Biome.values()) {
+      if (biome.toString().contains("OCEAN")) {
+        saltWaterBiomes.add(biome);
+      }
+    }
+
+    saltWaterBiomes.add(Biome.BEACH);
+    saltWaterBiomes.add(Biome.SNOWY_BEACH);
 
     for (Material mat : Material.values()) {
       if (mat.toString().contains("LOG") && !mat.toString().contains("LEGACY")) {

@@ -93,7 +93,7 @@ public class JobPerkProvider implements InventoryProvider {
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
       jobManager.openJobGUI(player);
     });
-    content.set(SlotPos.of(4, 4), backIcon);
+    content.set(SlotPos.of(4, 8), backIcon);
   }
 
   private ClickableItem getIcon(Player player, InventoryContent content, JobPerkType perkType, JobPerkType[] lvlPerks) {
@@ -117,7 +117,7 @@ public class JobPerkProvider implements InventoryProvider {
       }
 
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
-      this.reopen(player, content);
+      jobManager.openJobPerkGUI(player, jobType, page);
     });
   }
 }

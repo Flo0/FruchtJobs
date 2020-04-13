@@ -1,5 +1,6 @@
 package com.gestankbratwurst.fruchtjobs.jobs.guis;
 
+import com.gestankbratwurst.fruchtcore.resourcepack.skins.Model;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtcore.util.items.ItemBuilder;
 import com.gestankbratwurst.fruchtjobs.jobs.JobHolder;
@@ -43,15 +44,15 @@ public class JobOptionsProvider implements InventoryProvider {
     boolean bossBarEnabled = jobHolder.isBossBarDisplaying();
     boolean hologramsEnabled = jobHolder.isHologramDisplaying();
 
-    ItemStack actionBarIcon = new ItemBuilder(actionBarEnabled ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
+    ItemStack actionBarIcon = new ItemBuilder(actionBarEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
         .name("§eBenutze Action Bar: " + (actionBarEnabled ? "§a✔" : "§c✖"))
         .lore("", "§fBenutze die Action Bar zum Anzeigen", "§fvon Erfahrungspunkten.")
         .build();
-    ItemStack bossBarIcon = new ItemBuilder(bossBarEnabled ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
+    ItemStack bossBarIcon = new ItemBuilder(bossBarEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
         .name("§eBenutze Boss Bar: " + (bossBarEnabled ? "§a✔" : "§c✖"))
         .lore("", "§fBenutze die Boss Bar zum Anzeigen", "§fvon Erfahrungspunkten.")
         .build();
-    ItemStack hologramIcon = new ItemBuilder(hologramsEnabled ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
+    ItemStack hologramIcon = new ItemBuilder(hologramsEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
         .lore("", "§fBenutze Hologramme zum Anzeigen", "§fvon Erfahrungspunkten.")
         .name("§eBenutze Hologramme: " + (hologramsEnabled ? "§a✔" : "§c✖")).build();
 
