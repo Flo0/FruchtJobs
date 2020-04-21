@@ -44,15 +44,15 @@ public class JobOptionsProvider implements InventoryProvider {
     boolean bossBarEnabled = jobHolder.isBossBarDisplaying();
     boolean hologramsEnabled = jobHolder.isHologramDisplaying();
 
-    ItemStack actionBarIcon = new ItemBuilder(actionBarEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
+    ItemStack actionBarIcon = new ItemBuilder(actionBarEnabled ? Model.GREEN_CHECK.getItem() : Model.RED_X.getItem())
         .name("§eBenutze Action Bar: " + (actionBarEnabled ? "§a✔" : "§c✖"))
         .lore("", "§fBenutze die Action Bar zum Anzeigen", "§fvon Erfahrungspunkten.")
         .build();
-    ItemStack bossBarIcon = new ItemBuilder(bossBarEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
+    ItemStack bossBarIcon = new ItemBuilder(bossBarEnabled ? Model.GREEN_CHECK.getItem() : Model.RED_X.getItem())
         .name("§eBenutze Boss Bar: " + (bossBarEnabled ? "§a✔" : "§c✖"))
         .lore("", "§fBenutze die Boss Bar zum Anzeigen", "§fvon Erfahrungspunkten.")
         .build();
-    ItemStack hologramIcon = new ItemBuilder(hologramsEnabled ? Model.RED_X.getItem() : Model.GREEN_CHECK.getItem())
+    ItemStack hologramIcon = new ItemBuilder(hologramsEnabled ? Model.GREEN_CHECK.getItem() : Model.RED_X.getItem())
         .lore("", "§fBenutze Hologramme zum Anzeigen", "§fvon Erfahrungspunkten.")
         .name("§eBenutze Hologramme: " + (hologramsEnabled ? "§a✔" : "§c✖")).build();
 

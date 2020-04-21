@@ -22,7 +22,7 @@ public class LevelData {
     if (level < 1) {
       return 0;
     }
-    return level * level + 100 + (5 * level);
+    return (long) (level * level * 17.5) + (275L * level) + 475;
   }
 
   private static final RangeMap<Long, Integer> EXP_CURVE_MAPPING = TreeRangeMap.create();

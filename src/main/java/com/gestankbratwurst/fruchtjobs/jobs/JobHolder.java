@@ -7,6 +7,7 @@ import com.gestankbratwurst.fruchtcore.util.actionbar.ActionBarBoard.Section;
 import com.gestankbratwurst.fruchtcore.util.actionbar.ActionBarManager;
 import com.gestankbratwurst.fruchtcore.util.common.UtilItem;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
+import com.gestankbratwurst.fruchtcore.util.holograms.AbstractHologram;
 import com.gestankbratwurst.fruchtcore.util.holograms.MovingHologram;
 import com.gestankbratwurst.fruchtcore.util.holograms.impl.HologramManager;
 import com.gestankbratwurst.fruchtjobs.jobs.bossbar.JobBossBarManager;
@@ -20,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -41,9 +43,11 @@ public class JobHolder {
   private static final Vector MOVING_UP = new Vector(0, 0.05, 0);
   private static final int TICKS_ALIVE = 25;
 
-  public JobHolder(UUID ownerID, JobBossBarManager jobBossBarManager) {
+  public JobHolder(UUID ownerID, JobBossBarManager jobBossBarManager, JobManager jobManager) {
+    this.economy = jobManager.getEconomy();
     this.taskManager = FruchtCore.getInstance().getTaskManager();
     this.jobBossBarManager = jobBossBarManager;
+    this.jobManager = jobManager;
     this.actionBarManager = FruchtCore.getInstance().getUtilModule().getActionBarManager();
     this.hologramManager = FruchtCore.getInstance().getUtilModule().getHologramManager();
     this.professionMap = new EnumMap<>(JobType.class);
@@ -58,6 +62,7 @@ public class JobHolder {
     }
   }
 
+  private final JobManager jobManager;
   private final TaskManager taskManager;
   private final JobBossBarManager jobBossBarManager;
   private final ActionBarManager actionBarManager;
@@ -85,6 +90,8 @@ public class JobHolder {
   private final Inventory smallCobblePouch;
   @Getter
   private final Inventory smallLogPouch;
+
+  private final Economy economy;
 
   public boolean isMaxLevel(JobType type) {
     return jobMap.get(type).getLevel() == type.getMaxLevel();
@@ -185,7 +192,9 @@ public class JobHolder {
     return this.jobPerks.contains(perkType);
   }
 
-  public void addExp(JobType jobType, long exp) {
+  public void addExp(JobType jobType, long baseExp) {
+    baseExp *= jobManager.getExpScalar();
+    final long exp = baseExp;
     JobType profession = professionMap.get(jobType);
     if (profession != null) {
       jobType = profession;
@@ -202,6 +211,8 @@ public class JobHolder {
     if (player == null) {
       return;
     }
+
+    economy.depositPlayer(player, exp * 0.06D);
 
     if (preLvl != postLvl) {
       if (postLvl != jobType.getMaxLevel()) {
@@ -236,7 +247,9 @@ public class JobHolder {
       Location loc = player.getLocation().add(0, 1.5, 0);
       loc.add(loc.getDirection().normalize().multiply(2.5));
       MovingHologram moving = hologramManager.createMovingHologram(loc, MOVING_UP, TICKS_ALIVE);
-      moving.getHologram().appendTextLine("§e" + exp + " Exp §6§l" + type.getIconChar());
+      AbstractHologram hologram = moving.getHologram();
+      hologram.setPlayerFilter(p -> p == player);
+      hologram.appendTextLine("§e" + exp + " Exp §6§l" + type.getIconChar());
     }
   }
 

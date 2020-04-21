@@ -8,6 +8,7 @@ import com.gestankbratwurst.fruchtcore.util.Msg;
 import com.gestankbratwurst.fruchtcore.util.actionbar.ActionBarBoard.Section;
 import com.gestankbratwurst.fruchtcore.util.actionbar.ActionBarManager;
 import com.gestankbratwurst.fruchtcore.util.common.NameSpaceFactory;
+import com.gestankbratwurst.fruchtcore.util.common.UtilMobs;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
 import com.gestankbratwurst.fruchtjobs.FruchtJobs;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.FilletFurnaceRecipe;
@@ -35,6 +36,7 @@ import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHardLeatherLeggin
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeHomestone;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeIronArrow;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeIronArrowHead;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeJerky;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeLogPouch;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeSieve;
 import com.gestankbratwurst.fruchtjobs.jobs.recipes.impl.RecipeTreatedBow;
@@ -61,12 +63,14 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -98,6 +102,14 @@ public class JobPeripheral implements Listener {
 
     itemActionManager.registerInteractAction(ItemLibrary.LOG_POUCH.toString(), event ->
         jobManager.getOnlineHolder(event.getPlayer()).openSmallLogPouch());
+
+    itemActionManager.registerAttackAction(ItemLibrary.BUTCHER_KNIFER.toString(), ev -> {
+      if (ev.getEntity() instanceof LivingEntity) {
+        if (!UtilMobs.isDomesticated((LivingEntity) ev.getEntity())) {
+          ev.setDamage(ev.getDamage() * 0.1D);
+        }
+      }
+    });
 
     itemActionManager.registerKillAction(ItemLibrary.BUTCHER_KNIFER.toString(), (le, ev) -> {
       if (!(le instanceof Player)) {
@@ -209,6 +221,7 @@ public class JobPeripheral implements Listener {
     recipeModule.registerRecipe(new FurnaceShadFish());
     recipeModule.registerRecipe(new FurnaceShrimpFish());
     recipeModule.registerRecipe(new FurnaceSnapperFish());
+    recipeModule.registerRecipe(new RecipeJerky());
 
     Bukkit.getPluginManager().registerEvents(new JobPeripheral(core, plugin), plugin);
     double elapsed = sw.elapsed(TimeUnit.MICROSECONDS) / 1000D;
@@ -259,17 +272,17 @@ public class JobPeripheral implements Listener {
         return;
       }
       String pouchName = pouchItem.getItemMeta().getDisplayName();
-      if (STONES.contains(pickup) && pouchName.equals("§aKleiner Stein Beutel")) {
+      if (STONES.contains(pickup) && pouchName.equals("§aKleiner Steinbeutel")) {
         holder.getSmallCobblePouch().addItem(stack).values().forEach(remaining -> player.getInventory().addItem(remaining).values()
             .forEach(remainingLeft -> player.getWorld().dropItemNaturally(player.getLocation(), remainingLeft)));
         item.remove();
-        UtilPlayer.playSound(player, Sound.ENTITY_ITEM_PICKUP);
+        UtilPlayer.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.3F, 1F);
         event.setCancelled(true);
-      } else if (LOGS.contains(pickup) && pouchName.equals("§aKleiner Holz Beutel")) {
+      } else if (LOGS.contains(pickup) && pouchName.equals("§aKleiner Holzbeutel")) {
         holder.getSmallLogPouch().addItem(stack).values().forEach(remaining -> player.getInventory().addItem(remaining).values()
             .forEach(remainingLeft -> player.getWorld().dropItemNaturally(player.getLocation(), remainingLeft)));
         item.remove();
-        UtilPlayer.playSound(player, Sound.ENTITY_ITEM_PICKUP);
+        UtilPlayer.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.3F, 1F);
         event.setCancelled(true);
       }
     }

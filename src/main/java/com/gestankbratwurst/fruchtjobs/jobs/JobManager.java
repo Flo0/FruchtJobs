@@ -13,7 +13,10 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 import net.crytec.inventoryapi.SmartInventory;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -104,6 +107,7 @@ public class JobManager {
       .of(Material.DIRT, Material.GRASS_BLOCK, Material.GRASS_PATH, Material.FARMLAND);
 
   public JobManager(FruchtJobs plugin) {
+    this.economy = plugin.getEconomy();
     this.jobExpGainManager = new JobExpGainManager(plugin.getSieveManager(), this);
     this.jobBossBarManager = plugin.getJobBossBarManager();
     Bukkit.getPluginManager().registerEvents(new JobListener(this, jobBossBarManager, jobExpGainManager), plugin);
@@ -113,11 +117,16 @@ public class JobManager {
     Bukkit.getScheduler().runTaskTimer(plugin, this::checkPlayerPerkApplicatins, 20L, 20L);
   }
 
+  @Getter
+  private final Economy economy;
   private final JobExpGainManager jobExpGainManager;
   private final JobBossBarManager jobBossBarManager;
   private final Object2ObjectMap<UUID, JobHolder> holderMap;
   private final IOManager ioManager;
   private final PotionEffect speedOne = new PotionEffect(PotionEffectType.SPEED, 22, 0);
+  @Getter
+  @Setter
+  private double expScalar = 1.0;
 
   public void openJobGUI(Player player) {
     SmartInventory.builder().title("Jobs").size(5).provider(new JobMainProvider(this, getOnlineHolder(player))).build().open(player);
@@ -150,7 +159,7 @@ public class JobManager {
 
   private void loadHolder(UUID playerID) {
     ioManager.loadDataAsync(playerID, json -> {
-      JobHolder holder = new JobHolder(playerID, jobBossBarManager);
+      JobHolder holder = new JobHolder(playerID, jobBossBarManager, this);
       holder.load(json);
       this.holderMap.put(playerID, holder);
     });
@@ -174,7 +183,7 @@ public class JobManager {
       Biome playerBiome = player.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
       if (holder.isActive(JobType.GATHERER)) {
         if (holder.hasPerk(JobPerkType.CAVE_DIVER)) {
-          if (player.getLocation().getY() <= 70) {
+          if (player.getLocation().getY() <= 56) {
             player.addPotionEffect(speedOne);
           }
         } else if (holder.hasPerk(JobPerkType.FOREST_WANDERER)) {

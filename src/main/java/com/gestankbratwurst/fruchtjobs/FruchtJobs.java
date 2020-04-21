@@ -13,6 +13,8 @@ import com.gestankbratwurst.fruchtjobs.jobs.sieving.SieveManager;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class FruchtJobs extends JavaPlugin {
@@ -25,9 +27,12 @@ public final class FruchtJobs extends JavaPlugin {
   @Getter
   private SieveManager sieveManager;
   private PotionManager potionManager;
+  @Getter
+  private Economy economy;
 
   @Override
   public void onEnable() {
+    economy = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
     jobBossBarManager = new JobBossBarManager();
     paperCommandManager = FruchtCore.getInstance().getCommandManager();
     sieveManager = new SieveManager(this);

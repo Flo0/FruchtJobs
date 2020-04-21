@@ -52,7 +52,7 @@ public class SieveManager {
 
   protected void handleEvent(InventoryCloseEvent event) {
     SieveInventory inv = sieveInventories.remove(event.getInventory());
-    if (inv != null) {
+    if (inv != null && inv.isSieved()) {
       UtilPlayer.playSound((Player) event.getPlayer(), Sound.BLOCK_SAND_BREAK, 0.8F, 0.8F);
       inv.getSievedBlock().setType(Material.AIR);
     }

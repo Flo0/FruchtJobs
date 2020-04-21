@@ -2,6 +2,6 @@ name: FruchtJobs
 version: ${project.version}
 main: com.gestankbratwurst.fruchtjobs.FruchtJobs
 api-version: 1.13
-depend: [FruchtCore]
+depend: [FruchtCore, Vault]
 authors: [Gestankbratwurst]
 description: Jobs plugin für FruchtLabor

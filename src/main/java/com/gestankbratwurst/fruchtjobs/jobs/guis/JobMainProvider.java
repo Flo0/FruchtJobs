@@ -40,7 +40,8 @@ public class JobMainProvider implements InventoryProvider {
   @Override
   public void init(Player player, InventoryContent content) {
 
-    List<JobType> jobTypes = Arrays.stream(JobType.values()).filter(JobType::isMainJob).collect(Collectors.toList());
+    List<JobType> jobTypes = Arrays.stream(JobType.values()).filter(JobType::isMainJob)
+        .filter(j -> j != JobType.ALCHEMIST).collect(Collectors.toList());
     for (int x = 0; x < jobTypes.size(); x++) {
       JobType tempType = jobTypes.get(x);
       JobType profession = jobHolder.getProfession(tempType);
@@ -96,7 +97,10 @@ public class JobMainProvider implements InventoryProvider {
     content.set(SlotPos.of(4, 8), optionsButton);
 
     ClickableItem recipesButton = ClickableItem.of(new ItemBuilder(Material.CRAFTING_TABLE).name("§eRezepte").build(), e -> {
-      RecipeGUI.open(player);
+      RecipeGUI.open(player, ev -> {
+        UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+        this.reopen(player, content);
+      });
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
     });
     content.set(SlotPos.of(4, 0), recipesButton);

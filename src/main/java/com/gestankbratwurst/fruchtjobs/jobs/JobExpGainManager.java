@@ -1,5 +1,6 @@
 package com.gestankbratwurst.fruchtjobs.jobs;
 
+import com.destroystokyo.paper.block.TargetBlockInfo.FluidMode;
 import com.gestankbratwurst.fruchtcore.FruchtCore;
 import com.gestankbratwurst.fruchtcore.items.ItemLibrary;
 import com.gestankbratwurst.fruchtcore.tasks.TaskManager;
@@ -290,6 +291,7 @@ public class JobExpGainManager {
                 }
               }
             } else {
+              farmExp /= 2D;
               if (holder.hasPerk(JobPerkType.BETTER_HUNTING)) {
                 farmExp += Math.max(1, farmExp * 0.33);
               }
@@ -414,7 +416,7 @@ public class JobExpGainManager {
       Entity entity = event.getCaught();
       if (entity instanceof Item) {
         Item item = (Item) entity;
-        long fishExp = fishMap.getOrDefault(item.getItemStack().getType(), 0L) + event.getExpToDrop();
+        long fishExp = fishMap.getOrDefault(item.getItemStack().getType(), 0L) + (event.getExpToDrop() * 2);
         if (fishExp != 0L) {
           Location loc = entity.getLocation();
           Biome fishBiome = entity.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -423,7 +425,7 @@ public class JobExpGainManager {
               for (Double2ObjectMap.Entry<ItemStack> entry : freshWaterFishMap.double2ObjectEntrySet()) {
                 if (random.nextDouble() <= entry.getDoubleKey()) {
                   item.setItemStack(entry.getValue());
-                  fishExp += Math.min(1, fishExp * 0.25);
+                  fishExp += Math.min(1, fishExp * 0.30);
                   break;
                 }
               }
@@ -433,7 +435,7 @@ public class JobExpGainManager {
               for (Double2ObjectMap.Entry<ItemStack> entry : saltWaterFishMap.double2ObjectEntrySet()) {
                 if (random.nextDouble() <= entry.getDoubleKey()) {
                   item.setItemStack(entry.getValue());
-                  fishExp += Math.min(1, fishExp * 0.25);
+                  fishExp += Math.min(1, fishExp * 0.30);
                   break;
                 }
               }
@@ -449,6 +451,28 @@ public class JobExpGainManager {
     Player player = event.getPlayer();
     JobHolder holder = jobManager.getOnlineHolder(player);
     Block block = event.getClickedBlock();
+    ItemStack hitItem = event.getItem();
+    if (holder.hasPerk(JobPerkType.RECIPE_SALT)) {
+      if (hitItem != null && hitItem.getType() == Material.PAPER) {
+        Block targetBlock = player.getTargetBlock(3, FluidMode.SOURCE_ONLY);
+        if (targetBlock != null) {
+          if (targetBlock.getType() == Material.WATER) {
+            Biome targetBiome = targetBlock.getWorld().getBiome(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ());
+            if (saltWaterBiomes.contains(targetBiome)) {
+              player.getInventory().addItem(ItemLibrary.STONE_SALT.getItem()).values()
+                  .forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
+              targetBlock.getWorld().playSound(targetBlock.getLocation(), Sound.ENTITY_BOAT_PADDLE_WATER, 0.8F, 1.3F);
+              holder.addExp(JobType.FISHER, 1);
+              if (hitItem.getAmount() == 1) {
+                player.getInventory().setItemInMainHand(null);
+              } else {
+                hitItem.subtract();
+              }
+            }
+          }
+        }
+      }
+    }
     if (block == null) {
       return;
     }
@@ -458,12 +482,11 @@ public class JobExpGainManager {
     if (holder.isActive(JobType.FARMER)) {
       Material mat = block.getType();
       if (mat == Material.SWEET_BERRY_BUSH) {
-        Ageable ageable = (Ageable) block.getState();
+        Ageable ageable = (Ageable) block.getBlockData();
         if (ageable.getAge() == ageable.getMaximumAge()) {
           holder.addExp(JobType.FARMER, 3L);
         }
       }
-      ItemStack hitItem = event.getItem();
       if (hitItem != null) {
         if (hoes.contains(hitItem.getType())) {
           if (holder.hasPerk(JobPerkType.GREEN_THUMB)) {
@@ -638,7 +661,7 @@ public class JobExpGainManager {
     long herbExp = herbsMap.getOrDefault(material, 0L);
     if (miningExp != 0L) {
       if (holder.hasPerk(JobPerkType.ORE_HUNTER)) {
-        miningExp += Math.max(1, miningExp / 100D * 10D);
+        miningExp += Math.max(1, miningExp * 0.1D);
       }
       holder.addExp(JobType.GATHERER, miningExp);
     } else if (stoneMap.contains(material)) {
@@ -650,12 +673,12 @@ public class JobExpGainManager {
       }
     } else if (herbExp != 0L) {
       if (holder.hasPerk(JobPerkType.PLANT_HUNTER)) {
-        herbExp += Math.max(1, herbExp / 100D * 10D);
+        herbExp += Math.max(1, herbExp * 0.1);
       }
       holder.addExp(JobType.GATHERER, herbExp);
     } else if (woodcuttingExp != 0L) {
       if (holder.hasPerk(JobPerkType.TREE_HUNTER)) {
-        woodcuttingExp += Math.max(1, woodcuttingExp / 100D * 10D);
+        woodcuttingExp += Math.max(1, woodcuttingExp * 0.1D);
       }
       holder.addExp(JobType.GATHERER, woodcuttingExp);
     }
@@ -664,15 +687,14 @@ public class JobExpGainManager {
   private void init() {
     Stopwatch sw = Stopwatch.createStarted();
 
-    fishMap.put(Material.COD, 6L);
-    fishMap.put(Material.SALMON, 6L);
-    fishMap.put(Material.PUFFERFISH, 10L);
-    fishMap.put(Material.TROPICAL_FISH, 8L);
+    fishMap.put(Material.COD, 16L);
+    fishMap.put(Material.SALMON, 16L);
+    fishMap.put(Material.PUFFERFISH, 24L);
+    fishMap.put(Material.TROPICAL_FISH, 19L);
 
     oreMap.put(Material.COAL_ORE, 8L);
     oreMap.put(Material.IRON_ORE, 12L);
     oreMap.put(Material.REDSTONE_ORE, 13L);
-    oreMap.put(Material.NETHER_QUARTZ_ORE, 10L);
     oreMap.put(Material.LAPIS_ORE, 28L);
     oreMap.put(Material.GOLD_ORE, 22L);
     oreMap.put(Material.DIAMOND_ORE, 35L);
@@ -716,6 +738,7 @@ public class JobExpGainManager {
     herbsMap.put(Material.PEONY, 8L);
     herbsMap.put(Material.BEE_NEST, 160L);
     herbsMap.put(Material.GRASS, 1L);
+    herbsMap.put(Material.TALL_GRASS, 1L);
     herbsMap.put(Material.BEEHIVE, 160L);
 
     cropsMap.put(Material.WHEAT, 3L);
@@ -733,9 +756,9 @@ public class JobExpGainManager {
     digMap.put(Material.GRAVEL, 2L);
     digMap.put(Material.SAND, 1L);
     digMap.put(Material.CLAY, 12L);
-    digMap.put(Material.MOSSY_COBBLESTONE, 9L);
+    digMap.put(Material.MOSSY_COBBLESTONE, 12L);
     digMap.put(Material.SPAWNER, 1200L);
-    digMap.put(Material.NETHER_QUARTZ_ORE, 12L);
+    digMap.put(Material.NETHER_QUARTZ_ORE, 7L);
     digMap.put(Material.SOUL_SAND, 4L);
     digMap.put(Material.MAGMA_BLOCK, 3L);
     digMap.put(Material.SMOKER, 80L);
@@ -887,12 +910,12 @@ public class JobExpGainManager {
     oreVeinDrops.put(0.0018, new ItemStack(Material.LAPIS_ORE));
     oreVeinDrops.put(0.0075, new ItemStack(Material.REDSTONE_ORE));
 
-    domesticatedAnimalMap.put(EntityType.CHICKEN, 30L);
-    domesticatedAnimalMap.put(EntityType.COW, 50L);
-    domesticatedAnimalMap.put(EntityType.MUSHROOM_COW, 75L);
-    domesticatedAnimalMap.put(EntityType.PIG, 50L);
-    domesticatedAnimalMap.put(EntityType.RABBIT, 35L);
-    domesticatedAnimalMap.put(EntityType.SHEEP, 40L);
+    domesticatedAnimalMap.put(EntityType.CHICKEN, 18L);
+    domesticatedAnimalMap.put(EntityType.COW, 26L);
+    domesticatedAnimalMap.put(EntityType.MUSHROOM_COW, 55L);
+    domesticatedAnimalMap.put(EntityType.PIG, 26L);
+    domesticatedAnimalMap.put(EntityType.RABBIT, 18L);
+    domesticatedAnimalMap.put(EntityType.SHEEP, 22L);
 
     wildAnimalMap.put(EntityType.WOLF, 30L);
     wildAnimalMap.put(EntityType.SLIME, 25L);

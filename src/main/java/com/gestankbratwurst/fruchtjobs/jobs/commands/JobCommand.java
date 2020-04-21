@@ -22,7 +22,6 @@ import org.bukkit.entity.Player;
  *
  */
 @CommandAlias("job|jobs|berufe")
-@CommandPermission("jobs.commands.job")
 public class JobCommand extends BaseCommand {
 
   public JobCommand(JobManager jobManager) {
@@ -51,6 +50,24 @@ public class JobCommand extends BaseCommand {
     String jobElem = Msg.elem(jobType.getDisplayName());
     String playerElem = Msg.elem(sender.getName());
     Msg.send(sender, "Jobs", playerElem + " hat " + expElem + " für den Job " + jobElem + " erhalten.");
+  }
+
+  @Subcommand("admin expscalar set")
+  @CommandPermission("jobs.commands.admin")
+  @Syntax("<Scalar>")
+  public void setScalar(Player sender, double scalar) {
+    jobManager.setExpScalar(scalar);
+    Msg.send(sender, "Jobs", "Das Skalar ist jetzt: " + scalar);
+    Msg.send(sender, "Jobs", "Das entspricht: " + scalar * 100 + "% der normalen Erfahrung.");
+  }
+
+  @Subcommand("admin expscalar get")
+  @CommandPermission("jobs.commands.admin")
+  @Syntax("<Scalar>")
+  public void getScalar(Player sender) {
+    double scalar = jobManager.getExpScalar();
+    Msg.send(sender, "Jobs", "Das Skalar ist momentan: " + scalar);
+    Msg.send(sender, "Jobs", "Das entspricht: " + scalar * 100 + "% der normalen Erfahrung.");
   }
 
 }

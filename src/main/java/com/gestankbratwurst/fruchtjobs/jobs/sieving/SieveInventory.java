@@ -96,6 +96,8 @@ public class SieveInventory {
   private final Block sievedBlock;
   private boolean sieveSelected;
   private final ItemStack energyItem;
+  @Getter(AccessLevel.PROTECTED)
+  private boolean sieved = false;
 
   protected void handleClick(InventoryClickEvent event) {
     int slotID = event.getSlot();
@@ -104,6 +106,7 @@ public class SieveInventory {
       sieveSlot.onClick(event, holder, sieveSelected);
       bukkitInventory.setItem(slotID, sieveSlot.getDisplay());
       int energyMinus = 0;
+      sieved = true;
       if (event.isLeftClick()) {
         energyMinus = 1;
       } else if (event.isRightClick()) {

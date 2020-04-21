@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
@@ -38,40 +39,55 @@ public class JobListener implements Listener {
   private final JobBossBarManager jobBossBarManager;
   private final JobExpGainManager jobExpGainManager;
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onCraft(CraftItemEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onJoin(PlayerJoinEvent event) {
     jobManager.login(event.getPlayer().getUniqueId());
     jobBossBarManager.login(event.getPlayer());
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onQuit(PlayerQuitEvent event) {
     jobManager.logout(event.getPlayer().getUniqueId());
     jobBossBarManager.logout(event.getPlayer());
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onTame(EntityTameEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onKill(EntityDeathEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onFill(PlayerBucketFillEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onConsumeMilk(PlayerItemConsumeEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     if (event.getItem().getType() == Material.MILK_BUCKET) {
       Player player = event.getPlayer();
       if (player.getPersistentDataContainer().has(NameSpaceFactory.provide("MILK_DRINK"), PersistentDataType.LONG)) {
@@ -94,28 +110,43 @@ public class JobListener implements Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onShearing(PlayerShearEntityEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onBreed(EntityBreedEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onBreak(BlockBreakEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onInteract(PlayerInteractEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.HIGH)
   public void onFish(PlayerFishEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
     jobExpGainManager.handleEvent(event);
   }
 

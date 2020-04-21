@@ -1,5 +1,6 @@
 package com.gestankbratwurst.fruchtjobs.jobs;
 
+import com.gestankbratwurst.fruchtcore.resourcepack.skins.Model;
 import com.gestankbratwurst.fruchtcore.util.items.ItemBuilder;
 import com.gestankbratwurst.fruchtjobs.util.UtilMath;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public enum JobType {
       new JobType[]{}, 100),
   SHEPERD_BREEDER(false, "Schäfer und Züchter", Material.SHEARS, '⛏', new String[]{},
       new JobType[]{}, 100),
-  MONSTER_HUNTER(false, "Monster Jäger", Material.IRON_SWORD, '⛏', new String[]{},
+  MONSTER_HUNTER(false, "Monsterjäger", Material.IRON_SWORD, '⛏', new String[]{},
       new JobType[]{}, 100),
   HUNTER_AND_SHEPERD(false, "Jäger und Hirte", Material.LEAD, '⛏', new String[]{},
       new JobType[]{JobType.SHEPERD_BREEDER, JobType.MONSTER_HUNTER}, 100),
@@ -119,6 +120,9 @@ public enum JobType {
         .lore("§eFortschritt: §a" + progressExp[0] + "§2/§a" + progressExp[1] + "   §e[§f" + percent + "%§e]");
     builder.lore(UtilMath.getProgressBar(jobHolder.getProgress(this), 25, "⏹"));
     builder.lore("");
+    if (this == ALCHEMIST) {
+      builder.lore("§c! Noch nicht zum Testen ausgelegt !");
+    }
     builder.lore("§eExp Total: §f" + jobHolder.getExp(this));
     builder.lore("");
     builder.lore(this.description);
@@ -149,7 +153,7 @@ public enum JobType {
     boolean hasChosen = jobHolder.isActive(this);
     int maxJobs = jobHolder.getMaxJobs();
     int jobsLeft = jobHolder.getJobSlotsLeft();
-    ItemBuilder builder = new ItemBuilder(hasChosen ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE);
+    ItemBuilder builder = new ItemBuilder(hasChosen ? (Model.GREEN_CHECK.getItem()) : (Model.RED_X.getItem()));
     builder.name(hasChosen ? "§aJob ist aktiv" : (jobsLeft == 0 ? "§cKeine Jobs mehr wählbar" : "§aJob aktivieren"));
     builder.lore("");
     builder.lore("§fJobs frei: §a" + jobsLeft + "§2/§a" + maxJobs);
