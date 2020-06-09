@@ -34,6 +34,16 @@ public class FurnaceShadFish implements IFurnaceRecipe {
   }
 
   @Override
+  public boolean mirrorOnSmoker() {
+    return true;
+  }
+
+  @Override
+  public boolean mirrorOnBlastfurnace() {
+    return false;
+  }
+
+  @Override
   public ItemStack getResult() {
     return ItemLibrary.COOKED_SHAD.getItem();
   }

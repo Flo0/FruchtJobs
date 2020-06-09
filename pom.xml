@@ -24,7 +24,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.3.1</version>
         <configuration>
-          <outputDirectory>${settings.spigot}/plugins</outputDirectory>
+          <outputDirectory>C:\Users\suoto\Desktop\1.15Spigot\plugins</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
@@ -92,26 +92,6 @@
       <groupId>com.gestankbratwurst</groupId>
       <artifactId>FruchtCore</artifactId>
       <version>1.0.9-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-<!--    <dependency>-->
-<!--      <groupId>com.gestankbratwurst</groupId>-->
-<!--      <artifactId>FruchtCore</artifactId>-->
-<!--      <version>1.0.5</version>-->
-<!--      <scope>system</scope>-->
-<!--      <systemPath>${project.basedir}/src/main/resources/FruchtCore.jar</systemPath>-->
-<!--    </dependency>-->
-    <dependency>
-      <groupId>com.destroystokyo.paper</groupId>
-      <artifactId>paper-api</artifactId>
-      <version>1.15.2-R0.1-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- PaperAPI -->
-    <dependency>
-      <groupId>com.destroystokyo.paper</groupId>
-      <artifactId>paper-api</artifactId>
-      <version>1.15.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <!-- ProtocolLib-->

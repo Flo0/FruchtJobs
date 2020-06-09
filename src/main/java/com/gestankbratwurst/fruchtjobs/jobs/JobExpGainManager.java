@@ -164,7 +164,7 @@ public class JobExpGainManager {
       return;
     }
     for (Entry<ItemStack, JobExpPackage> entry : recipeMaps.entrySet()) {
-      if (entry.getKey().isSimilar(result)) {
+      if (entry.getKey().getType() == result.getType()) {
         JobExpPackage jobExpPackage = entry.getValue();
         JobHolder holder = jobManager.getOnlineHolder((Player) event.getWhoClicked());
         if (holder.isActive(jobExpPackage.getJobType())) {
@@ -371,7 +371,7 @@ public class JobExpGainManager {
         if (stoneMap.contains(material)) {
           for (Double2ObjectMap.Entry<ItemStack> entry : oreVeinDrops.double2ObjectEntrySet()) {
             if (random.nextDouble() <= entry.getDoubleKey()) {
-              dropLoc.getWorld().dropItemNaturally(dropLoc, entry.getValue());
+              taskManager.runBukkitSync(() -> dropLoc.getWorld().dropItemNaturally(dropLoc, entry.getValue()));
             }
           }
         }
@@ -416,7 +416,7 @@ public class JobExpGainManager {
       Entity entity = event.getCaught();
       if (entity instanceof Item) {
         Item item = (Item) entity;
-        long fishExp = fishMap.getOrDefault(item.getItemStack().getType(), 0L) + (event.getExpToDrop() * 2);
+        long fishExp = fishMap.getOrDefault(item.getItemStack().getType(), 0L) + (event.getExpToDrop() * 3);
         if (fishExp != 0L) {
           Location loc = entity.getLocation();
           Biome fishBiome = entity.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -625,14 +625,14 @@ public class JobExpGainManager {
       if (bd instanceof Ageable) {
         Ageable ab = (Ageable) bd;
         if (ab.getAge() == ab.getMaximumAge()) {
-          holder.addExp(JobType.GATHERER, farmingExp);
+          holder.addExp(JobType.FARMER, farmingExp);
         }
       }
     } else if (fruitExp != 0L) {
       if (holder.hasPerk(JobPerkType.BETTER_HARVEST)) {
         fruitExp += Math.max(1, farmingExp * 0.1);
       }
-      holder.addExp(JobType.GATHERER, fruitExp);
+      holder.addExp(JobType.FARMER, fruitExp);
     } else if (material == Material.SUGAR_CANE) {
       int canes = 1;
       while ((block = block.getRelative(BlockFace.UP)).getType() == Material.SUGAR_CANE) {
@@ -641,7 +641,7 @@ public class JobExpGainManager {
       if (holder.hasPerk(JobPerkType.BETTER_HARVEST)) {
         canes += Math.max(1, canes * 0.1);
       }
-      holder.addExp(JobType.GATHERER, canes);
+      holder.addExp(JobType.FARMER, canes);
     } else if (material == Material.BAMBOO) {
       int bamboos = 1;
       while ((block = block.getRelative(BlockFace.UP)).getType() == Material.BAMBOO) {
@@ -650,7 +650,7 @@ public class JobExpGainManager {
       if (holder.hasPerk(JobPerkType.BETTER_HARVEST)) {
         bamboos += Math.max(1, bamboos * 0.1);
       }
-      holder.addExp(JobType.GATHERER, Math.max(1, bamboos / 2));
+      holder.addExp(JobType.FARMER, Math.max(1, bamboos / 2));
     }
   }
 
@@ -687,10 +687,10 @@ public class JobExpGainManager {
   private void init() {
     Stopwatch sw = Stopwatch.createStarted();
 
-    fishMap.put(Material.COD, 16L);
-    fishMap.put(Material.SALMON, 16L);
-    fishMap.put(Material.PUFFERFISH, 24L);
-    fishMap.put(Material.TROPICAL_FISH, 19L);
+    fishMap.put(Material.COD, 20L);
+    fishMap.put(Material.SALMON, 20L);
+    fishMap.put(Material.PUFFERFISH, 32L);
+    fishMap.put(Material.TROPICAL_FISH, 23L);
 
     oreMap.put(Material.COAL_ORE, 8L);
     oreMap.put(Material.IRON_ORE, 12L);
@@ -757,7 +757,7 @@ public class JobExpGainManager {
     digMap.put(Material.SAND, 1L);
     digMap.put(Material.CLAY, 12L);
     digMap.put(Material.MOSSY_COBBLESTONE, 12L);
-    digMap.put(Material.SPAWNER, 1200L);
+    digMap.put(Material.SPAWNER, 1450L);
     digMap.put(Material.NETHER_QUARTZ_ORE, 7L);
     digMap.put(Material.SOUL_SAND, 4L);
     digMap.put(Material.MAGMA_BLOCK, 3L);
@@ -810,54 +810,54 @@ public class JobExpGainManager {
     findingsSet.add(Material.CAULDRON);
     findingsSet.add(Material.BREWING_STAND);
 
-    recipeMaps.put(new ItemStack(Material.FLINT_AND_STEEL), JobExpPackage.of(JobType.CRAFTER, 9));
-    recipeMaps.put(new ItemStack(Material.BUCKET), JobExpPackage.of(JobType.CRAFTER, 18));
-    recipeMaps.put(new ItemStack(Material.SHEARS), JobExpPackage.of(JobType.CRAFTER, 12));
-    recipeMaps.put(new ItemStack(Material.WOODEN_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 2));
-    recipeMaps.put(new ItemStack(Material.WOODEN_AXE), JobExpPackage.of(JobType.CRAFTER, 2));
-    recipeMaps.put(new ItemStack(Material.WOODEN_SWORD), JobExpPackage.of(JobType.CRAFTER, 2));
-    recipeMaps.put(new ItemStack(Material.WOODEN_HOE), JobExpPackage.of(JobType.CRAFTER, 2));
-    recipeMaps.put(new ItemStack(Material.WOODEN_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 1));
-    recipeMaps.put(new ItemStack(Material.BOOKSHELF), JobExpPackage.of(JobType.CRAFTER, 30));
-    recipeMaps.put(new ItemStack(Material.ANVIL), JobExpPackage.of(JobType.CRAFTER, 188));
-    recipeMaps.put(new ItemStack(Material.IRON_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 7));
-    recipeMaps.put(new ItemStack(Material.IRON_AXE), JobExpPackage.of(JobType.CRAFTER, 19));
-    recipeMaps.put(new ItemStack(Material.IRON_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 19));
-    recipeMaps.put(new ItemStack(Material.IRON_SWORD), JobExpPackage.of(JobType.CRAFTER, 13));
-    recipeMaps.put(new ItemStack(Material.BOW), JobExpPackage.of(JobType.CRAFTER, 13));
-    recipeMaps.put(new ItemStack(Material.STONE_SWORD), JobExpPackage.of(JobType.CRAFTER, 3));
-    recipeMaps.put(new ItemStack(Material.STONE_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 4));
-    recipeMaps.put(new ItemStack(Material.STONE_AXE), JobExpPackage.of(JobType.CRAFTER, 4));
-    recipeMaps.put(new ItemStack(Material.STONE_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 2));
-    recipeMaps.put(new ItemStack(Material.STONE_HOE), JobExpPackage.of(JobType.CRAFTER, 3));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_AXE), JobExpPackage.of(JobType.CRAFTER, 61));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 61));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_SWORD), JobExpPackage.of(JobType.CRAFTER, 41));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_HOE), JobExpPackage.of(JobType.CRAFTER, 41));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 21));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_SWORD), JobExpPackage.of(JobType.CRAFTER, 31));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 16));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_AXE), JobExpPackage.of(JobType.CRAFTER, 36));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 36));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_HOE), JobExpPackage.of(JobType.CRAFTER, 31));
-    recipeMaps.put(new ItemStack(Material.LEATHER_HELMET), JobExpPackage.of(JobType.CRAFTER, 30));
-    recipeMaps.put(new ItemStack(Material.LEATHER_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 48));
-    recipeMaps.put(new ItemStack(Material.LEATHER_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 42));
-    recipeMaps.put(new ItemStack(Material.LEATHER_BOOTS), JobExpPackage.of(JobType.CRAFTER, 24));
-    recipeMaps.put(new ItemStack(Material.CHAINMAIL_HELMET), JobExpPackage.of(JobType.CRAFTER, 30));
-    recipeMaps.put(new ItemStack(Material.CHAINMAIL_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 48));
-    recipeMaps.put(new ItemStack(Material.CHAINMAIL_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 42));
-    recipeMaps.put(new ItemStack(Material.CHAINMAIL_BOOTS), JobExpPackage.of(JobType.CRAFTER, 24));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_HELMET), JobExpPackage.of(JobType.CRAFTER, 100));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 160));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 140));
-    recipeMaps.put(new ItemStack(Material.DIAMOND_BOOTS), JobExpPackage.of(JobType.CRAFTER, 80));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_HELMET), JobExpPackage.of(JobType.CRAFTER, 75));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 120));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 105));
-    recipeMaps.put(new ItemStack(Material.GOLDEN_BOOTS), JobExpPackage.of(JobType.CRAFTER, 60));
-    recipeMaps.put(new ItemStack(Material.FISHING_ROD), JobExpPackage.of(JobType.CRAFTER, 9));
-    recipeMaps.put(new ItemStack(Material.ARROW), JobExpPackage.of(JobType.CRAFTER, 6));
+    recipeMaps.put(new ItemStack(Material.FLINT_AND_STEEL), JobExpPackage.of(JobType.CRAFTER, 9 * 3));
+    recipeMaps.put(new ItemStack(Material.BUCKET), JobExpPackage.of(JobType.CRAFTER, 18 * 3));
+    recipeMaps.put(new ItemStack(Material.SHEARS), JobExpPackage.of(JobType.CRAFTER, 12 * 3));
+    recipeMaps.put(new ItemStack(Material.WOODEN_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 2 * 3));
+    recipeMaps.put(new ItemStack(Material.WOODEN_AXE), JobExpPackage.of(JobType.CRAFTER, 2 * 3));
+    recipeMaps.put(new ItemStack(Material.WOODEN_SWORD), JobExpPackage.of(JobType.CRAFTER, 2 * 3));
+    recipeMaps.put(new ItemStack(Material.WOODEN_HOE), JobExpPackage.of(JobType.CRAFTER, 2 * 3));
+    recipeMaps.put(new ItemStack(Material.WOODEN_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 1 * 3));
+    recipeMaps.put(new ItemStack(Material.BOOKSHELF), JobExpPackage.of(JobType.CRAFTER, 30 * 3));
+    recipeMaps.put(new ItemStack(Material.ANVIL), JobExpPackage.of(JobType.CRAFTER, 188 * 3));
+    recipeMaps.put(new ItemStack(Material.IRON_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 7 * 3));
+    recipeMaps.put(new ItemStack(Material.IRON_AXE), JobExpPackage.of(JobType.CRAFTER, 19 * 3));
+    recipeMaps.put(new ItemStack(Material.IRON_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 19 * 3));
+    recipeMaps.put(new ItemStack(Material.IRON_SWORD), JobExpPackage.of(JobType.CRAFTER, 13 * 3));
+    recipeMaps.put(new ItemStack(Material.BOW), JobExpPackage.of(JobType.CRAFTER, 13 * 3));
+    recipeMaps.put(new ItemStack(Material.STONE_SWORD), JobExpPackage.of(JobType.CRAFTER, 3 * 3));
+    recipeMaps.put(new ItemStack(Material.STONE_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 4 * 3));
+    recipeMaps.put(new ItemStack(Material.STONE_AXE), JobExpPackage.of(JobType.CRAFTER, 4 * 3));
+    recipeMaps.put(new ItemStack(Material.STONE_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 2 * 3));
+    recipeMaps.put(new ItemStack(Material.STONE_HOE), JobExpPackage.of(JobType.CRAFTER, 3 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_AXE), JobExpPackage.of(JobType.CRAFTER, 61 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 61 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_SWORD), JobExpPackage.of(JobType.CRAFTER, 41 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_HOE), JobExpPackage.of(JobType.CRAFTER, 41 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 21 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_SWORD), JobExpPackage.of(JobType.CRAFTER, 31 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_SHOVEL), JobExpPackage.of(JobType.CRAFTER, 16 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_AXE), JobExpPackage.of(JobType.CRAFTER, 36 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_PICKAXE), JobExpPackage.of(JobType.CRAFTER, 36 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_HOE), JobExpPackage.of(JobType.CRAFTER, 31 * 3));
+    recipeMaps.put(new ItemStack(Material.LEATHER_HELMET), JobExpPackage.of(JobType.CRAFTER, 30 * 3));
+    recipeMaps.put(new ItemStack(Material.LEATHER_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 48 * 3));
+    recipeMaps.put(new ItemStack(Material.LEATHER_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 42 * 3));
+    recipeMaps.put(new ItemStack(Material.LEATHER_BOOTS), JobExpPackage.of(JobType.CRAFTER, 24 * 3));
+    recipeMaps.put(new ItemStack(Material.CHAINMAIL_HELMET), JobExpPackage.of(JobType.CRAFTER, 30 * 3));
+    recipeMaps.put(new ItemStack(Material.CHAINMAIL_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 48 * 3));
+    recipeMaps.put(new ItemStack(Material.CHAINMAIL_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 42 * 3));
+    recipeMaps.put(new ItemStack(Material.CHAINMAIL_BOOTS), JobExpPackage.of(JobType.CRAFTER, 24 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_HELMET), JobExpPackage.of(JobType.CRAFTER, 100 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 160 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 140 * 3));
+    recipeMaps.put(new ItemStack(Material.DIAMOND_BOOTS), JobExpPackage.of(JobType.CRAFTER, 80 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_HELMET), JobExpPackage.of(JobType.CRAFTER, 75 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_CHESTPLATE), JobExpPackage.of(JobType.CRAFTER, 120 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_LEGGINGS), JobExpPackage.of(JobType.CRAFTER, 105 * 3));
+    recipeMaps.put(new ItemStack(Material.GOLDEN_BOOTS), JobExpPackage.of(JobType.CRAFTER, 60 * 3));
+    recipeMaps.put(new ItemStack(Material.FISHING_ROD), JobExpPackage.of(JobType.CRAFTER, 9 * 3));
+    recipeMaps.put(new ItemStack(Material.ARROW), JobExpPackage.of(JobType.CRAFTER, 6 * 3));
 
     smithItems.add(new ItemStack(Material.ANVIL));
     smithItems.add(new ItemStack(Material.IRON_AXE));
@@ -902,13 +902,13 @@ public class JobExpGainManager {
     freshWaterFishMap.put(0.061, ItemLibrary.SHAD.getItem());
     freshWaterFishMap.put(0.221, ItemLibrary.TROUT.getItem());
 
-    oreVeinDrops.put(0.0012, new ItemStack(Material.EMERALD_ORE));
-    oreVeinDrops.put(0.0016, new ItemStack(Material.DIAMOND_ORE));
-    oreVeinDrops.put(0.015, new ItemStack(Material.IRON_ORE));
-    oreVeinDrops.put(0.028, new ItemStack(Material.COAL_ORE));
-    oreVeinDrops.put(0.0024, new ItemStack(Material.GOLD_ORE));
-    oreVeinDrops.put(0.0018, new ItemStack(Material.LAPIS_ORE));
-    oreVeinDrops.put(0.0075, new ItemStack(Material.REDSTONE_ORE));
+    oreVeinDrops.put(0.001 * 0.6, new ItemStack(Material.EMERALD));
+    oreVeinDrops.put(0.0014 * 0.6, new ItemStack(Material.DIAMOND));
+    oreVeinDrops.put(0.013 * 0.7, new ItemStack(Material.IRON_ORE));
+    oreVeinDrops.put(0.026 * 0.7, new ItemStack(Material.COAL_ORE));
+    oreVeinDrops.put(0.0022 * 0.6, new ItemStack(Material.GOLD_ORE));
+    oreVeinDrops.put(0.0016 * 0.6, new ItemStack(Material.LAPIS_LAZULI));
+    oreVeinDrops.put(0.01, new ItemStack(Material.REDSTONE));
 
     domesticatedAnimalMap.put(EntityType.CHICKEN, 18L);
     domesticatedAnimalMap.put(EntityType.COW, 26L);
@@ -941,9 +941,9 @@ public class JobExpGainManager {
 
     extraDigDrops.put(0.0025, () -> new ItemStack(Material.DIAMOND));
     extraDigDrops.put(0.002, () -> new ItemStack(Material.EMERALD));
-    extraDigDrops.put(0.08, () -> new ItemStack(Material.BONE));
-    extraDigDrops.put(0.081, () -> new ItemStack(Material.BONE_MEAL));
-    extraDigDrops.put(0.0451, () -> new ItemStack(Material.GRAVEL));
+    extraDigDrops.put(0.06, () -> new ItemStack(Material.BONE));
+    extraDigDrops.put(0.061, () -> new ItemStack(Material.BONE_MEAL));
+    extraDigDrops.put(0.0351, () -> new ItemStack(Material.GRAVEL));
     extraDigDrops.put(0.0452, () -> new ItemStack(Material.SAND));
     extraDigDrops.put(0.0453, () -> new ItemStack(Material.CLAY_BALL));
     extraDigDrops.put(0.01, () -> new ItemStack(Material.LAPIS_LAZULI));

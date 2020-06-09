@@ -10,27 +10,29 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice;
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
  *
- * This file is part of FruchtJobs and was created at the 13.04.2020
+ * This file is part of FruchtJobs and was created at the 29.05.2020
  *
  * FruchtJobs can not be copied and/or distributed without the express
  * permission of the owner.
  *
  */
-public class FurnaceTroutFish implements IFurnaceRecipe {
+public class FurnaceBreadBun implements IFurnaceRecipe {
+
+  private final RecipeChoice input = new ExactChoice(ItemLibrary.UNCOOKED_BREAD_BUN.getItem());
 
   @Override
   public RecipeChoice getInput() {
-    return new ExactChoice(ItemLibrary.TROUT.getItem());
+    return input;
   }
 
   @Override
   public int getExp() {
-    return 1;
+    return 8;
   }
 
   @Override
   public int getCookingTime() {
-    return 200;
+    return 20;
   }
 
   @Override
@@ -45,7 +47,7 @@ public class FurnaceTroutFish implements IFurnaceRecipe {
 
   @Override
   public ItemStack getResult() {
-    return ItemLibrary.COOKED_TROUT.getItem();
+    return ItemLibrary.BREAD_BUN.getItem();
   }
 
   @Override
@@ -55,16 +57,17 @@ public class FurnaceTroutFish implements IFurnaceRecipe {
 
   @Override
   public String getName() {
-    return "furnacetroutfish";
+    return "breadbunfurnace";
   }
 
   @Override
   public String[] getDescription(Player player) {
-    return new String[0];
+    return new String[]{"", "§7Heilt 2 Leben.", "§7Zutat für Burger."};
   }
 
   @Override
   public String getDisplayName(Player player) {
-    return ItemLibrary.COOKED_TROUT.getItem().getItemMeta().getDisplayName();
+    return getResult().getItemMeta().getDisplayName();
   }
+
 }

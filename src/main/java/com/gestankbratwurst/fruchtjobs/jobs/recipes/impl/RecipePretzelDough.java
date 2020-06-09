@@ -1,7 +1,9 @@
 package com.gestankbratwurst.fruchtjobs.jobs.recipes.impl;
 
 import com.gestankbratwurst.fruchtcore.items.ItemLibrary;
-import com.gestankbratwurst.fruchtcore.recipes.IShapelessCraftingRecipe;
+import com.gestankbratwurst.fruchtjobs.jobs.JobManager;
+import com.gestankbratwurst.fruchtjobs.jobs.JobType;
+import com.gestankbratwurst.fruchtjobs.jobs.recipes.AbstractJobShapelessRecipe;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,28 +18,26 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice;
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
  *
- * This file is part of FruchtJobs and was created at the 13.04.2020
+ * This file is part of FruchtJobs and was created at the 29.05.2020
  *
  * FruchtJobs can not be copied and/or distributed without the express
  * permission of the owner.
  *
  */
-public class RecipeJerky implements IShapelessCraftingRecipe {
+public class RecipePretzelDough extends AbstractJobShapelessRecipe {
 
-  public RecipeJerky() {
-    choices = new ArrayList<>();
-    RecipeChoice fleshChoice = new MaterialChoice(Material.ROTTEN_FLESH, Material.BEEF, Material.PORKCHOP, Material.RABBIT,
-        Material.MUTTON);
-    RecipeChoice saltChoice = new ExactChoice(ItemLibrary.STONE_SALT.getItem());
-    choices.add(saltChoice);
-    choices.add(fleshChoice);
+  public RecipePretzelDough(JobManager jobManager) {
+    super(jobManager, JobType.FARMER, 8);
   }
 
-  private final List<RecipeChoice> choices;
+  @Override
+  protected List<String> evalDescription(Player player) {
+    return new ArrayList<>();
+  }
 
   @Override
   public ItemStack getResult() {
-    return ItemLibrary.JERKY.getItem();
+    return ItemLibrary.UNCOOKED_PRETZEL.getItem();
   }
 
   @Override
@@ -47,21 +47,15 @@ public class RecipeJerky implements IShapelessCraftingRecipe {
 
   @Override
   public String getName() {
-    return "jerky";
-  }
-
-  @Override
-  public String[] getDescription(Player player) {
-    return new String[0];
-  }
-
-  @Override
-  public String getDisplayName(Player player) {
-    return ItemLibrary.JERKY.getItem().getItemMeta().getDisplayName();
+    return "pretzeldough";
   }
 
   @Override
   public List<RecipeChoice> getChoices() {
+    List<RecipeChoice> choices = new ArrayList<>();
+    choices.add(new ExactChoice(ItemLibrary.DOUGH.getItem()));
+    choices.add(new ExactChoice(ItemLibrary.STONE_SALT.getItem()));
     return choices;
   }
+
 }

@@ -2,6 +2,7 @@ package com.gestankbratwurst.fruchtjobs.jobs.guis;
 
 import com.gestankbratwurst.fruchtcore.util.Msg;
 import com.gestankbratwurst.fruchtcore.util.common.UtilPlayer;
+import com.gestankbratwurst.fruchtcore.util.guis.ConfirmationGUI;
 import com.gestankbratwurst.fruchtcore.util.items.ItemBuilder;
 import com.gestankbratwurst.fruchtjobs.jobs.JobHolder;
 import com.gestankbratwurst.fruchtjobs.jobs.JobManager;
@@ -43,7 +44,7 @@ public class JobPerkProvider implements InventoryProvider {
   private final JobType jobType;
   private final int page;
   private int slotIndex;
-  private int firstHit;
+  private final int firstHit;
   private int hitIndex;
 
 
@@ -108,16 +109,18 @@ public class JobPerkProvider implements InventoryProvider {
       if (hasLvlPerk) {
         Msg.error(player, "Jobs", "Du hast schon einen Perk für dieses Level.");
       } else if (jobHolder.getLvl(perkType.getJobType()) >= perkType.getLevel()) {
-        jobHolder.addPerkType(perkType);
-        String perkName = perkType.getDisplayName();
-        Msg.send(player, "Jobs", "Du hast den Perk " + perkName + " erhalten.");
-        UtilPlayer.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
+        ConfirmationGUI.open(player, perkType.getDisplayName(), succ -> {
+          jobHolder.addPerkType(perkType);
+          String perkName = perkType.getDisplayName();
+          Msg.send(player, "Jobs", "Du hast den Perk " + perkName + " erhalten.");
+          UtilPlayer.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
+          jobManager.openJobPerkGUI(player, jobType, page);
+        }, fail -> jobManager.openJobPerkGUI(player, jobType, page));
       } else {
         Msg.error(player, "Jobs", "Du hast noch nicht das benötigte level.");
       }
 
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
-      jobManager.openJobPerkGUI(player, jobType, page);
     });
   }
 }

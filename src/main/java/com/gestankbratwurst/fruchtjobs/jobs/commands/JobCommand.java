@@ -10,7 +10,9 @@ import co.aikar.commands.annotation.Syntax;
 import com.gestankbratwurst.fruchtcore.util.Msg;
 import com.gestankbratwurst.fruchtjobs.jobs.JobManager;
 import com.gestankbratwurst.fruchtjobs.jobs.JobType;
+import com.gestankbratwurst.fruchtjobs.jobs.guis.JobMainProvider;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
@@ -50,6 +52,13 @@ public class JobCommand extends BaseCommand {
     String jobElem = Msg.elem(jobType.getDisplayName());
     String playerElem = Msg.elem(sender.getName());
     Msg.send(sender, "Jobs", playerElem + " hat " + expElem + " für den Job " + jobElem + " erhalten.");
+  }
+
+  @Subcommand("admin userecipesound")
+  @CommandPermission("jobs.commands.admin")
+  public void onUseSound(Player sender, boolean value) {
+    JobMainProvider.PLAY_INFO_SOUND = value;
+    Msg.send(sender, "Jobs", "Sound value gesetzt: " + Msg.elem("" + value));
   }
 
   @Subcommand("admin expscalar set")

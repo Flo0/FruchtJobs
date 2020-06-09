@@ -10,15 +10,15 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice;
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
  *
- * This file is part of FruchtJobs and was created at the 09.04.2020
+ * This file is part of FruchtJobs and was created at the 29.05.2020
  *
  * FruchtJobs can not be copied and/or distributed without the express
  * permission of the owner.
  *
  */
-public class FilletFurnaceRecipe implements IFurnaceRecipe {
+public class FurnacePretzel implements IFurnaceRecipe {
 
-  private final RecipeChoice input = new ExactChoice(ItemLibrary.FILLET.getItem());
+  private final RecipeChoice input = new ExactChoice(ItemLibrary.UNCOOKED_PRETZEL.getItem());
 
   @Override
   public RecipeChoice getInput() {
@@ -36,8 +36,18 @@ public class FilletFurnaceRecipe implements IFurnaceRecipe {
   }
 
   @Override
+  public boolean mirrorOnSmoker() {
+    return true;
+  }
+
+  @Override
+  public boolean mirrorOnBlastfurnace() {
+    return false;
+  }
+
+  @Override
   public ItemStack getResult() {
-    return ItemLibrary.COOKED_FILLET.getItem();
+    return ItemLibrary.PRETZEL.getItem();
   }
 
   @Override
@@ -47,12 +57,12 @@ public class FilletFurnaceRecipe implements IFurnaceRecipe {
 
   @Override
   public String getName() {
-    return "cookedfillet";
+    return "pretzelfurnace";
   }
 
   @Override
   public String[] getDescription(Player player) {
-    return new String[]{"", "§7Gekochtes Fillet.", "§7Heilt etwas Leben."};
+    return new String[]{"", "§7Heilt 1 Leben."};
   }
 
   @Override

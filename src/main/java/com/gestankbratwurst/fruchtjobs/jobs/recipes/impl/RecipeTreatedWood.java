@@ -36,14 +36,14 @@ public class RecipeTreatedWood extends AbstractJobShapelessRecipe {
     super(jobManager, JobType.CRAFTER, 0, JobPerkType.PREPARATIONS);
     desc = new ArrayList<>();
     desc.add("§7Material für weitere Rezepte.");
-    choices = new ObjectOpenHashSet<>();
+    choices = new ArrayList<>();
     choices.add(new MaterialChoice(Material.STICK));
     choices.add(new MaterialChoice(Material.POTION));
     choices.add(new MaterialChoice(Material.CLAY_BALL));
   }
 
   private final ArrayList<String> desc;
-  private final ObjectSet<RecipeChoice> choices;
+  private final List<RecipeChoice> choices;
 
   @Override
   protected List<String> evalDescription(Player player) {
@@ -66,7 +66,7 @@ public class RecipeTreatedWood extends AbstractJobShapelessRecipe {
   }
 
   @Override
-  public Set<RecipeChoice> getChoices() {
+  public List<RecipeChoice> getChoices() {
     return choices;
   }
 
